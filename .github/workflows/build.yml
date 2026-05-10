@@ -5,12 +5,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
-      - run: flutter pub get
-      - run: flutter build apk --release
+          channel: 'stable'
+
+      - name: Create Flutter project scaffold
+        run: flutter create --project-name finance_tracker --org com.example -t app temp_app
+
+      - name: Copy source files into scaffold
+        run: |
+          cp -r lib/* temp_app/lib/
+          cp pubspec.yaml temp_app/pubspec.yaml
+
+      - name: Get dependencies
+        working-directory: temp_app
+        run: flutter pub get
+
+      - name: Build APK
+        working-directory: temp_app
+        run: flutter build apk --release
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: temp_app/build/app/outputs/flutter-apk/app-release.apk
